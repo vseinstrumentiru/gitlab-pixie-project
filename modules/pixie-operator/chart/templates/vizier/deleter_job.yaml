@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    helm.sh/hook: pre-delete
+    helm.sh/hook-delete-policy: hook-succeeded
+  name: {{ .Release.Name }}-vizier-deleter
+  namespace: '{{ .Release.Namespace }}'
+spec:
+  template:
+    metadata:
+      name: {{ .Release.Name }}-vizier-deleter
+    spec:
+      containers:
+      - env:
+        - name: PL_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: PL_VIZIER_NAME
+          value: {{ .Release.Name }}-{{ .Values.name }}
+        image: gcr.io/pixie-oss/pixie-prod/operator/vizier_deleter:0.0.28
+        name: delete-job
+      {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 6 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      restartPolicy: Never
+      serviceAccountName: {{ .Release.Name }}-pl-deleter-service-account

@@ -1,0 +1,64 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Release.Name }}-pixie-operator-cluster-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Name }}-pixie-operator-role
+subjects:
+- kind: ServiceAccount
+  name: {{ .Release.Name }}-pixie-operator-service-account
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Name }}-pixie-operator-role
+rules:
+# Allow actions on Kubernetes objects
+- apiGroups:
+  - ""
+  - apps
+  - rbac.authorization.k8s.io
+  - extensions
+  - etcd.database.coreos.com
+  - batch
+  - nats.io
+  - policy
+  - apiextensions.k8s.io
+  - px.dev
+  resources:
+  - clusterroles
+  - clusterrolebindings
+  - configmaps
+  - customresourcedefinitions
+  - secrets
+  - pods
+  - events
+  - services
+  - deployments
+  - daemonsets
+  - nodes
+  - persistentvolumes
+  - persistentvolumeclaims
+  - roles
+  - rolebindings
+  - serviceaccounts
+  - etcdclusters
+  - statefulsets
+  - cronjobs
+  - jobs
+  - natsclusters
+  - poddisruptionbudgets
+  - podsecuritypolicies
+  - viziers
+  - viziers/status
+  verbs: ["*"]
+# Allow read-only access to storage class.
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - storageclasses
+  verbs: ["get", "list"]
